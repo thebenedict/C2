@@ -4,10 +4,6 @@ default: &default
   adapter: postgresql
   encoding: unicode
 
-  # should match puma.rb
-  # https://devcenter.heroku.com/articles/concurrency-and-database-connections#threaded-servers
-  pool: <%= ENV['MAX_THREADS'] || 5 %>
-
 development:
   <<: *default
   database: c2_development
