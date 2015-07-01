@@ -3,7 +3,8 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  pool: <%= ENV['MAX_THREADS'] || 5 %>
+  username: <%= ENV['SOMETHING'] %>
+  pool: <%= ENV['MS'] || "5" %>
 
 development:
   <<: *default
