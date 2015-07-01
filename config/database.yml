@@ -4,7 +4,7 @@ default: &default
   adapter: postgresql
   encoding: unicode
   username: <%= ENV['SOMETHING'] %>
-  pool: <%= ENV['MS'] || "5" %>
+  pool: <%= ENV['MS'] %>
 
 development:
   <<: *default
