@@ -3,6 +3,7 @@
 default: &default
   adapter: postgresql
   encoding: unicode
+  pool: <%= ENV['MAX_THREADS'] || 5 %>
 
 development:
   <<: *default
