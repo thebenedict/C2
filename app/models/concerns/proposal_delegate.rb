@@ -4,11 +4,13 @@ module ProposalDelegate
 
   included do
     has_many :approvals, through: :proposal
-    has_many :approvers, through: :approvals, source: :user
+    has_many :approvers, through: :proposal
+    has_many :user_approvals, through: :proposal
     has_many :observations, through: :proposal
-    has_many :observers, through: :observations, source: :user
+    has_many :observers, through: :proposal
     has_many :comments, through: :proposal
     has_one :requester, through: :proposal
+    has_one :root_approval, through: :proposal
 
     accepts_nested_attributes_for :proposal
 
