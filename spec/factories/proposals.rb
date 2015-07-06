@@ -1,22 +1,30 @@
 FactoryGirl.define do
   factory :proposal do
-    flow 'parallel'
     status 'pending'
     association :requester, factory: :user
 
     trait :with_approver do
       after :create do |proposal|
-        proposal.add_approver('approver1@some-dot-gov.gov')
-        proposal.initialize_approvals()
+        approval = proposal.add_approver('approver1@some-dot-gov.gov')
+        approval.make_actionable!
       end
     end
 
-    trait :with_approvers do
-      with_approver
-
+    trait :with_serial_approvers do
       after :create do |proposal|
+        proposal.root_approval = Approvals::Serial.new
+        proposal.add_approver('approver1@some-dot-gov.gov')
         proposal.add_approver('approver2@some-dot-gov.gov')
-        proposal.initialize_approvals()
+        proposal.root_approval.make_actionable!
+      end
+    end
+
+    trait :with_parallel_approvers do
+      after :create do |proposal|
+        proposal.root_approval = Approvals::Parallel.new
+        proposal.add_approver('approver1@some-dot-gov.gov')
+        proposal.add_approver('approver2@some-dot-gov.gov')
+        proposal.root_approval.make_actionable!
       end
     end
 

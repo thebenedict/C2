@@ -57,16 +57,10 @@ class Dispatcher
 
   # todo: replace with dynamic dispatch
   def self.initialize_dispatcher(proposal)
-    case proposal.flow
-    when 'parallel'
+    if proposal.client == 'ncr'
+      NcrDispatcher.new
+    else
       self.new
-    when 'linear'
-      # @todo: dynamic dispatch for selection
-      if proposal.client == "ncr"
-        NcrDispatcher.new
-      else
-        LinearDispatcher.new
-      end
     end
   end
 

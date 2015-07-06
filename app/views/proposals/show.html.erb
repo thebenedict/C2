@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <%- if @proposal.linear? %>
+    <%- if @proposal.root_approval.class == Approvals::Serial # @todo: account for different approval trees %>
       <div class="col-md-12">
         <table class="col-md-12 data_container" border='0'>
           <%= render partial: "shared/email_status" %>

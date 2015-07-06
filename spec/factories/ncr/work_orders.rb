@@ -9,10 +9,10 @@ FactoryGirl.define do
     rwa_number "R1234567" # TODO remove, since it's not applicable for BA61
     org_code Ncr::Organization.all[0].to_s
     project_title "NCR Name"
-    association :proposal, flow: 'linear'
+    association :proposal
 
     trait :with_approvers do
-      association :proposal, :with_approvers, flow: 'linear'
+      association :proposal, :with_serial_approvers
     end
   end
 end

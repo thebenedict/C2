@@ -24,8 +24,10 @@
                   <%- end %>
                 </td>
                 <td>
+                  <%- #@todo: account for more complicated approvals %>
+                  <%- use_linear_tag = @proposal.root_approval.class == Approvals::Serial %>
                   <%- last_approver = index == @proposal.approvals_in_list_order.count - 1 %>
-                  <%= status_icon_tag(display_status, @proposal.linear?, last_approver) %>
+                  <%= status_icon_tag(display_status, use_linear_tag, last_approver) %>
                   <span class="approver">
                     <%= mail_to approval.user_email_address, approval.user_full_name %>
                   </span>
