@@ -34,14 +34,6 @@ describe ProposalsController do
 
       expect(assigns(:proposals_data).rows.size).to eq(2)
     end
-
-    context 'smoke test' do
-      render_views
-
-      it 'does not explode' do
-        get :archive
-      end
-    end
   end
 
   describe '#show' do
