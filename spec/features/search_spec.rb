@@ -30,4 +30,17 @@ describe "searching" do
     field = find_field('text')
     expect(field.value).to eq('foo')
   end
+
+  it "links to the correct proposals" do
+    proposals = (1..4).each do |i|
+      wo = FactoryGirl.create(:ncr_work_order, project_title: "Project Number #{i}")
+      wo.proposal.update_attributes(requester: user, id: i+1, public_id: i+1)
+      wo.proposal
+    end
+    visit '/proposals'
+    fill_in 'text', with: proposals.last.name
+    click_button 'Search'
+    click_on '4'  
+    expect(current_path).to have_content('/proposals/4')
+  end
 end
