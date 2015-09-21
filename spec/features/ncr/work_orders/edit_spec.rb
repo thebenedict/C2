@@ -269,6 +269,18 @@ describe "editing NCR work orders" do
   end
 
   describe "post-approval modifications" do
+    def expect_budget_approvals_restarted
+      work_order.reload
+      expect(work_order.status).to eq('pending')
+      approval_statuses = work_order.individual_approvals.pluck(:status)
+      expect(approval_statuses).to eq(%w(
+        approved
+        actionable
+        pending
+      ))
+      # TODO check who gets notified
+    end
+
     before do
       work_order.setup_approvals_and_observers('approver@example.com')
       fully_approve(ncr_proposal)
@@ -292,15 +304,28 @@ describe "editing NCR work orders" do
       fill_in 'Amount', with: work_order.amount + 1
       click_on 'Update'
 
+      expect_budget_approvals_restarted
+    end
+
+    it "doesn't require re-approval for a budget approver adding a Function code" do
+      login_as(work_order.budget_approvers.first)
+
+      visit "/ncr/work_orders/#{work_order.id}/edit"
+      fill_in 'Function code', with: 'foo'
+      click_on 'Update'
+
       work_order.reload
-      expect(work_order.status).to eq('pending')
-      approval_statuses = work_order.individual_approvals.pluck(:status)
-      expect(approval_statuses).to eq(%w(
-        approved
-        actionable
-        pending
-      ))
-      # TODO check who gets notified
+      expect(work_order.status).to eq('approved')
+    end
+
+    it "requires re-approval for a non-budget-approver adding a Function code" do
+      login_as(requester)
+
+      visit "/ncr/work_orders/#{work_order.id}/edit"
+      fill_in 'Function code', with: 'foo'
+      click_on 'Update'
+
+      expect_budget_approvals_restarted
     end
   end
 end
