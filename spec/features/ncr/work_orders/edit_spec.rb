@@ -1,18 +1,27 @@
 describe "editing NCR work orders" do
+  def fully_approve(proposal)
+    proposal.individual_approvals.each do |approval|
+      approval.reload
+      approval.approve!
+    end
+    expect(proposal.reload).to be_approved # sanity check
+    deliveries.clear
+  end
+
   around(:each) do |example|
     with_env_var('DISABLE_SANDBOX_WARNING', 'true') do
       example.run
     end
   end
 
-  let!(:approver) { FactoryGirl.create(:user) }
   let(:work_order) { FactoryGirl.create(:ncr_work_order, description: 'test') }
   let(:ncr_proposal) { work_order.proposal }
+  let(:requester) { ncr_proposal.requester }
 
   describe "when logged in as the requester" do
     before do
       work_order.setup_approvals_and_observers('approver@example.com')
-      login_as(work_order.requester)
+      login_as(requester)
     end
 
     it "can be edited if pending" do
@@ -197,7 +206,7 @@ describe "editing NCR work orders" do
     end
 
     it "can be edited if approved" do
-      ncr_proposal.update_attributes(status: 'approved')  # avoid workflow
+      fully_approve(ncr_proposal)
 
       visit "/ncr/work_orders/#{work_order.id}/edit"
       expect(current_path).to eq("/ncr/work_orders/#{work_order.id}/edit")
@@ -257,5 +266,30 @@ describe "editing NCR work orders" do
     visit "/ncr/work_orders/#{work_order.id}/edit"
     expect(current_path).to eq("/ncr/work_orders/new")
     expect(page).to have_content("You must be the requester, approver, or observer")
+  end
+
+  describe "post-approval modifications" do
+    before do
+      work_order.setup_approvals_and_observers('approver@example.com')
+      fully_approve(ncr_proposal)
+    end
+
+    it "requires re-approval for the amount being increased" do
+      login_as(requester)
+
+      visit "/ncr/work_orders/#{work_order.id}/edit"
+      fill_in 'Amount', with: work_order.amount + 1
+      click_on 'Update'
+
+      work_order.reload
+      expect(work_order.status).to eq('pending')
+      approval_statuses = work_order.individual_approvals.pluck(:status)
+      expect(approval_statuses).to eq(%w(
+        approved
+        actionable
+        pending
+      ))
+      # TODO check who gets notified
+    end
   end
 end
