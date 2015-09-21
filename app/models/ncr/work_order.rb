@@ -52,6 +52,7 @@ module Ncr
     }, allow_blank: true
 
     def set_defaults
+      # TODO have the columns default to `false` at the DB level
       self.direct_pay ||= false
       self.not_to_exceed ||= false
       self.emergency ||= false
